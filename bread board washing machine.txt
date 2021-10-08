@@ -1,0 +1,237 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: UTEP	
+// Engineer: KRISTOF GRASSE
+// 
+// Create Date:    10/10/2016 
+// Design Name: 
+// Module Name:    Final lab 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module LAB10_Spring2017(nSW0, nSW1, nSW2, yBTN3, nSW7, msclk, mstimer, clk, cSTATE, Lssd, Rssd, hLED5, hLED6, hLED7
+    );
+    input 	nSW0; //basic wash
+	 input   nSW1; //normal wash
+	 input   nSW2; //heavy wash
+	 input 	yBTN3; //25c
+	 input 	nSW7; //lid closed
+	 input	clk;
+    
+	 output reg [26:0] mstimer;
+	 output reg [6:0] Rssd;
+    output reg	[6:0] Lssd;
+    output reg [5:0] cSTATE; //current state
+	 output reg hLED5; //spin
+	 output reg hLED6; //rinse
+	 output reg hLED7; //wash
+	 output msclk;
+	 //wire msclk = (mstimer[15:0] == 16'd49999)
+	 wire msclk = (mstimer[26:0] == 27'h4000000)
+	 ;
+	
+	 
+//assign -> add addition operation; 
+
+always @ (posedge clk)
+	if (mstimer[26:0] < 27'h4000000) mstimer <= mstimer + 1;
+	else mstimer <= 0;
+
+always @ (posedge clk)
+	if (msclk)
+		case (cSTATE)
+			5'h00: if (yBTN3==1) cSTATE <= 5'h1; //button is pushed (more money put in); go to state 1
+					else cSTATE <= 5'h0; //button is not pushed; stay in state 0
+					
+			5'h01: if (yBTN3==1) cSTATE <= 5'h2; //button is pushed (more money put in); go to state 2
+					else cSTATE <= 5'h1; //button is not pushed; stay in state 1
+			
+			5'h02: if (nSW0==0) cSTATE <= 5'h5; //basic wash selected; go to basic wash
+					else if (yBTN3==1) cSTATE <= 5'h3; //button is pushed (more money put in); go to state 3
+					else cSTATE <= 5'h2; //button is not pushed; stay in state 2
+					
+			5'h03: if (nSW1==0) cSTATE <= 5'hb; //normal wash selected; go to normal wash
+					else if (yBTN3==1) cSTATE <= 5'h4; //button is pushed (more money put in); go to state 4
+					else cSTATE <= 5'h3; //button is not pushed; stay in state 2
+					
+			5'h04: if (nSW2==0) cSTATE <= 5'h12; //heavy wash selected; go to heavy wash
+					else cSTATE <= 5'h0; //invalid state; go to start
+			
+			5'h05: if (nSW7==0) cSTATE <= 5'h6; //lid is down; go to next state
+					else cSTATE <= 5'h5;
+			
+			//[5'h6:5'h9]: cSTATE <= cSTATE + 1;
+			
+			5'h06: cSTATE <= cSTATE + 1;
+			
+			5'h07: cSTATE <= cSTATE + 1;
+			
+			5'h08: cSTATE <= cSTATE + 1;
+			
+			5'h09: cSTATE <= cSTATE + 1;
+			
+			5'h0a: cSTATE <= 5'h0; //basic wash finished; go to start
+			
+			5'h0b: if (nSW7==0) cSTATE <= 5'hc; //lid is down; go to next state
+					else cSTATE <= 5'hb;
+			
+			//[5'hc:5'h10]: cSTATE <= cSTATE + 1;
+			
+			5'h0c: cSTATE <= cSTATE + 1;
+			
+			5'h0d: cSTATE <= cSTATE + 1;
+			
+			5'h0e: cSTATE <= cSTATE + 1;
+			
+			5'h0f: cSTATE <= cSTATE + 1;
+			
+			5'h10: cSTATE <= cSTATE + 1;
+			
+			5'h11: cSTATE <= 5'h0; //normal wash finished; go to start
+			
+			5'h12: if (nSW7==0) cSTATE <= 5'h13; //lid is down; go to next state
+					else cSTATE <= 5'h12;
+			
+			//[5'h13:5'h19]: cSTATE <= cSTATE + 1;
+			5'h13: cSTATE <= cSTATE + 1;
+			
+			5'h14: cSTATE <= cSTATE + 1;
+			
+			5'h15: cSTATE <= cSTATE + 1;
+			
+			5'h16: cSTATE <= cSTATE + 1;
+			
+			5'h17: cSTATE <= cSTATE + 1;
+			
+			5'h18: cSTATE <= cSTATE + 1;
+			
+			5'h19: cSTATE <= cSTATE + 1;
+			
+			5'h1a: cSTATE <= 5'h0; //heavy wash finished; go to start
+			
+			default: cSTATE <= 5'h0; //undefined state; go to start
+		endcase
+	else cSTATE <= cSTATE;
+	//else cSTATE <= 5'h9;
+		
+always @ (posedge clk)
+	case (cSTATE)
+		5'h08: hLED5 <= 1; //spin LED on
+		5'h09: hLED5 <= 1; //spin LED on
+		5'h0a: hLED5 <= 1; //spin LED on
+		
+		5'h0e: hLED5 <= 1; //spin LED on
+		5'h10: hLED5 <= 1; //spin LED on
+		5'h11: hLED5 <= 1; //spin LED on
+		
+		5'h15: hLED5 <= 1; //spin LED on
+		5'h17: hLED5 <= 1; //spin LED on
+		5'h19: hLED5 <= 1; //spin LED on
+		5'h1a: hLED5 <= 1; //spin LED on
+			
+		default: hLED5 <= 0; //spin LED off
+	endcase
+	
+always @ (posedge clk)
+	case (cSTATE)
+		5'h09: hLED6 <= 1; //rinse LED on
+		
+		5'h0f: hLED6 <= 1; //rinse LED on
+		5'h10: hLED6 <= 1; //rinse LED on
+		
+		5'h18: hLED6 <= 1; //rinse LED on
+		5'h19: hLED6 <= 1; //rinse LED on
+		
+		default: hLED6 <= 0; //rinse LED off
+	endcase
+	
+always @ (posedge clk)
+	case (cSTATE)
+		5'h07: hLED7 <= 1; //wash LED on
+		5'h08: hLED7 <= 1; //wash LED on
+		
+		5'h0d: hLED7 <= 1; //wash LED on
+		5'h0e: hLED7 <= 1; //wash LED on
+		
+		5'h14: hLED7 <= 1; //wash LED on
+		5'h15: hLED7 <= 1; //wash LED on
+		5'h16: hLED7 <= 1; //wash LED on
+		5'h17: hLED7 <= 1; //wash LED on
+				
+		default: hLED7 <= 0; //wash LED off
+	endcase
+
+always @ (posedge clk)
+	case (cSTATE)
+		5'h00: Lssd <= 7'b1111110; //00
+		5'h01: Lssd <= 7'b1101101; //25
+		5'h02: Lssd <= 7'b1011011; //50
+		5'h03: Lssd <= 7'b1110000; //75
+		5'h04: Lssd <= 7'b0110000; //10
+		5'h05: Lssd <= 7'b1011011; //50
+		5'h06: Lssd <= 7'b1111001; //UTEP ID 37
+		5'h07: Lssd <= 7'b0011111; //bc
+		5'h08: Lssd <= 7'b0011111; //bc
+		5'h09: Lssd <= 7'b0011111; //bc
+		5'h0a: Lssd <= 7'b0011111; //bc
+		5'h0b: Lssd <= 7'b1110000; //75
+		5'h0c: Lssd <= 7'b1111001; //UTEP ID 37
+		5'h0d: Lssd <= 7'b0010101; //nO
+		5'h0e: Lssd <= 7'b0010101; //nO
+		5'h0f: Lssd <= 7'b0010101; //nO
+		5'h10: Lssd <= 7'b0010101; //nO
+		5'h11: Lssd <= 7'b0010101; //nO
+		5'h12: Lssd <= 7'b0110000; //10
+		5'h13: Lssd <= 7'b1111001; //UTEP ID 37
+		5'h14: Lssd <= 7'b0110111; //hY
+		5'h15: Lssd <= 7'b0110111; //hY
+		5'h16: Lssd <= 7'b0110111; //hY
+		5'h17: Lssd <= 7'b0110111; //hY
+		5'h18: Lssd <= 7'b0110111; //hY
+		5'h19: Lssd <= 7'b0110111; //hY
+		5'h1a: Lssd <= 7'b0110111; //hY
+		default: Lssd <= 7'b1001111; //EE
+	endcase
+	
+always @ (posedge clk)
+	case (cSTATE)
+		5'h00: Rssd <= 7'b1111110; //00
+		5'h01: Rssd <= 7'b1011011; //25
+		5'h02: Rssd <= 7'b1111110; //50
+		5'h03: Rssd <= 7'b1011011; //75
+		5'h04: Rssd <= 7'b1111110; //10
+		5'h05: Rssd <= 7'b1111110; //50
+		5'h06: Rssd <= 7'b1110000; //UTEP ID 37
+		5'h07: Rssd <= 7'b1001110; //bc
+		5'h08: Rssd <= 7'b1001110; //bc
+		5'h09: Rssd <= 7'b1001110; //bc
+		5'h0a: Rssd <= 7'b1001110; //bc
+		5'h0b: Rssd <= 7'b1011011; //75
+		5'h0c: Rssd <= 7'b1110000; //UTEP ID 37
+		5'h0d: Rssd <= 7'b1111110; //nO
+		5'h0e: Rssd <= 7'b1111110; //nO
+		5'h0f: Rssd <= 7'b1111110; //nO
+		5'h10: Rssd <= 7'b1111110; //nO
+		5'h11: Rssd <= 7'b1111110; //nO
+		5'h12: Rssd <= 7'b1111110; //10
+		5'h13: Rssd <= 7'b1110000; //UTEP ID 37
+		5'h14: Rssd <= 7'b0111011; //hY
+		5'h15: Rssd <= 7'b0111011; //hY
+		5'h16: Rssd <= 7'b0111011; //hY
+		5'h17: Rssd <= 7'b0111011; //hY
+		5'h18: Rssd <= 7'b0111011; //hY
+		5'h19: Rssd <= 7'b0111011; //hY
+		5'h1a: Rssd <= 7'b0111011; //hY
+		default: Rssd <= 7'b1001111; //EE
+	endcase
+endmodule
+
